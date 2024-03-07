@@ -1,10 +1,10 @@
-# modified from scrip from_DB_split_list.py to avoid needing to use the sql server. Instead geometry gets loaded from file geodatabase on disk
+# modified from script from_DB_split_list.py to avoid needing to use the sql server. Instead geometry gets loaded from file geodatabase on disk
 # 2023 GFW database export script
 
-import os
 import sys
+import fiona
+import config
 import logging
-import pandas as pd
 import numpy as np
 import geopandas as gpd
 from shapely import wkb
@@ -53,7 +53,9 @@ def createGrid(degrees=1.0):
 
 
 def loadFGDB(path):
-    gdf = gpd.read_file(path, driver="FileGDB", layer=0).set_crs(4326)
+    # Find and read poly layer
+    poly_lyr = [l for l in fiona.listlayers(path) if "poly" in l][0]
+    gdf = gpd.read_file(path, driver="FileGDB", layer=poly_lyr).set_crs(4326)
     return gdf
 
 
@@ -110,8 +112,8 @@ if __name__ == "__main__":
     """This is executed when run from the command line"""
 
     main(
-        r"D:\data\WDPA_Quarterly_Update\data\2023_Q4\wdpa_2023_q4.gdb",
-        4,
+        path_to_fgdb=config.INPUT_GDB_PATH,
+        list_id=4,
         save_geojson=False,
     )
 
