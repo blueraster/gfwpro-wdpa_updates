@@ -92,6 +92,8 @@ def main(path_to_fgdb, list_id, save_geojson=False):
         wkb.dumps, hex=True
     )  # add in wkb
 
+    gdf_intersection["location_id"] = gdf_intersection["WDPA_PID"]
+
     logging.info("saving to csv")
     gdf_intersection[["list_id", "location_id", "geom"]].to_csv(
         "diced_protectedAreas.txt", sep="\t", index=False
@@ -103,6 +105,9 @@ def main(path_to_fgdb, list_id, save_geojson=False):
         save_columns = ["list_id", "location_id", "geom", "geometry"]
         cols_to_drop = [c for c in columns if c not in save_columns]
         gdf_intersection = gdf_intersection.drop(columns=cols_to_drop)
+        gdf_intersection = gdf_intersection.replace(
+            to_replace='"', value="", regex=True
+        )
         gdf_intersection.to_file("diced.geojson", driver="GeoJSON")
 
     return
