@@ -92,7 +92,7 @@ def main(path_to_fgdb, list_id, save_geojson=False):
         wkb.dumps, hex=True
     )  # add in wkb
 
-    gdf_intersection["location_id"] = gdf_intersection["WDPA_PID"]
+    gdf_intersection["location_id"] = gdf_intersection.index
 
     logging.info("saving to csv")
     gdf_intersection[["list_id", "location_id", "geom"]].to_csv(
@@ -102,12 +102,6 @@ def main(path_to_fgdb, list_id, save_geojson=False):
     if save_geojson == True:
 
         logging.info("saving to geojson")
-        save_columns = ["list_id", "location_id", "geom", "geometry"]
-        cols_to_drop = [c for c in columns if c not in save_columns]
-        gdf_intersection = gdf_intersection.drop(columns=cols_to_drop)
-        gdf_intersection = gdf_intersection.replace(
-            to_replace='"', value="", regex=True
-        )
         gdf_intersection.to_file("diced.geojson", driver="GeoJSON")
 
     return
@@ -119,7 +113,7 @@ if __name__ == "__main__":
     main(
         path_to_fgdb=config.INPUT_GDB_PATH,
         list_id=4,
-        save_geojson=False,
+        save_geojson=True,
     )
 
     logging.info("done")
