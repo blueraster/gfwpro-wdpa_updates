@@ -83,9 +83,6 @@ def main(path_to_fgdb, list_id, save_geojson=False):
     gdf_intersection = gpd.overlay(
         gdf, grid, how="intersection", keep_geom_type=True, make_valid=True
     )
-    print(gdf_intersection.head())
-    columns = gdf_intersection.columns
-    print(columns)
 
     logging.info("save geometry as wkb")
     gdf_intersection["geom"] = gdf_intersection.geometry.apply(
