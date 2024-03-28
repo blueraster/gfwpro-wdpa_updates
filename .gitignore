@@ -1,6 +1,9 @@
 # Project specific
 input/
 output/
+*.ipynb
+data/
+scripts/config.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

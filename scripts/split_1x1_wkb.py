@@ -8,6 +8,8 @@ import logging
 import numpy as np
 import geopandas as gpd
 from shapely import wkb
+from pathlib import Path
+
 
 root = logging.getLogger()
 root.setLevel(logging.INFO)
@@ -59,12 +61,11 @@ def loadFGDB(path):
     return gdf
 
 
-def main(path_to_fgdb, list_id, save_geojson=False):
+def main(path_to_fgdb, list_id):
     """
     Main function to split a list of polygons into a grid
     :param path_to_fgdb: path to the input file geodatabase
     :param list_id: id of the gfwlist
-    :param save_geojson:
     :return:
     """
     logging.info(f"loading {path_to_fgdb}")
@@ -73,6 +74,11 @@ def main(path_to_fgdb, list_id, save_geojson=False):
     logging.info("loaded location_id dataframe")
 
     gdf["list_id"] = list_id
+    gdf["location_id"] = gdf.index
+
+    undiced_out = str(Path(config.OUTPUT_DIR) / "undiced_out.txt")
+    logging.info(f"saving to {undiced_out}")
+    gdf.to_csv(undiced_out, sep="\t", index=False)
 
     # print(gdf.head())
 
@@ -89,17 +95,11 @@ def main(path_to_fgdb, list_id, save_geojson=False):
         wkb.dumps, hex=True
     )  # add in wkb
 
-    gdf_intersection["location_id"] = gdf_intersection.index
-
-    logging.info("saving to csv")
+    diced_out = str(Path(config.OUTPUT_DIR) / "diced_out.txt")
+    logging.info(f"saving to {diced_out}")
     gdf_intersection[["list_id", "location_id", "geom"]].to_csv(
-        "diced_protectedAreas.txt", sep="\t", index=False
+        diced_out, sep="\t", index=False
     )
-
-    if save_geojson == True:
-
-        logging.info("saving to geojson")
-        gdf_intersection.to_file("diced.geojson", driver="GeoJSON")
 
     return
 
@@ -107,10 +107,6 @@ def main(path_to_fgdb, list_id, save_geojson=False):
 if __name__ == "__main__":
     """This is executed when run from the command line"""
 
-    main(
-        path_to_fgdb=config.INPUT_GDB_PATH,
-        list_id=4,
-        save_geojson=True,
-    )
+    main(path_to_fgdb=config.INPUT_GDB_PATH, list_id=4)
 
     logging.info("done")

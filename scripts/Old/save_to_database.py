@@ -111,25 +111,25 @@ def nvarcharConvert(df):
 if __name__ == "__main__":
     """This is executed when run from the command line"""
 
-    # Connect to the database
-    conn_string = getConfigData("CONN_STRING")
-    engine = sal.create_engine(conn_string)
-    conn = engine.connect()
-    print("Connected to DB")
+    # # Connect to the database
+    # conn_string = getConfigData("CONN_STRING")
+    # engine = sal.create_engine(conn_string)
+    # conn = engine.connect()
+    # print("Connected to DB")
 
-    # Create df with all original location ids from db
-    loc_id_sql = "SELECT [location_id] FROM [gfwpro].[dbo].[list-protectedAreas_import]"
-    loc_id_df = pd.read_sql(loc_id_sql, conn)
-    print("Retrieved location_id data from database")
+    # # Create df with all original location ids from db
+    # loc_id_sql = "SELECT [location_id] FROM [gfwpro].[dbo].[list-protectedAreas_import]"
+    # loc_id_df = pd.read_sql(loc_id_sql, conn)
+    # print("Retrieved location_id data from database")
 
-    # Read csv to df
-    file_path = getConfigData("PROT_FILE_PATH")
-    input_df = pd.read_csv(file_path, sep="\t")
-    print("Read input data")
+    # # Read csv to df
+    # file_path = getConfigData("PROT_FILE_PATH")
+    # input_df = pd.read_csv(file_path, sep="\t")
+    # print("Read input data")
 
-    # Merge dataframes
-    merged_df = pd.merge(loc_id_df, input_df, on="location_id", how="outer")
-    print("Created merged dataframe")
+    # # Merge dataframes
+    # merged_df = pd.merge(loc_id_df, input_df, on="location_id", how="outer")
+    # print("Created merged dataframe")
 
     # Clean input_df
     merged_df = cleanData(merged_df)

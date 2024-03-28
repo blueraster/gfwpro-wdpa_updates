@@ -4,7 +4,7 @@
 import sqlalchemy as sal
 
 # CSV name : DB name
-col_names_dict = {
+analysis_cols_dict = {
     "list_id": "id",
     "location_id": "location_id",
     "status_code": "location_status_id",
@@ -55,7 +55,7 @@ col_names_dict = {
 
 
 # DB column name : Data type
-db_schema_dict = {
+analysis_schema_dict = {
     "id": sal.INTEGER,
     "location_id": sal.INTEGER,
     "location_status_id": sal.INTEGER,
@@ -125,4 +125,25 @@ db_schema_dict = {
     "tree_cover_loss_arg_otbn_yearly": sal.NVARCHAR(length=None),
     "arg_otbn_area": sal.NVARCHAR(length=None),
     "argentina_presence": sal.NVARCHAR(length=None),
+}
+
+list_cols_dict = {
+    "Location Name": "Name",
+    "Latitude": "",
+    "Longitude": "",
+    "Country": "",
+    "State": "",
+    "Sub State": "",
+    "Size": "",
+    "IUCN CAT": "",
+    "Designation Type": "",
+    "Designation": "",
+    "Location CLassification": "",
+    "gadmid": "",
+    "globalid": "",
+    "WDPAID": "",
+    "WDPA_PID": "",
+    "Geometry": "",
+    "location_id": "",
+    "id": "",
 }
