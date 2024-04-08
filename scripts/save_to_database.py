@@ -1,31 +1,9 @@
 # save_to_database.py
 
-
-import configparser
+import config
 import pandas as pd
 import sqlalchemy as sal
-import name_conversion_dict
-
-
-# Import data from config.ini
-def getConfigData(config_request):
-    """
-    Reads data from a local config file
-
-    Args:
-      config_request  : String containing the data to be retrieved
-
-    Return:
-      The requested data
-    """
-
-    config_file = r"gfwlists\wdpa\config.ini"
-
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    config_response = config.get("DEFAULT", config_request)
-
-    return config_response
+import name_conversion as name_conversion
 
 
 def cleanData(df):
@@ -52,15 +30,15 @@ def cleanData(df):
     )
 
     # Rename cols
-    df = df.rename(columns=name_conversion_dict.col_names_dict)
+    df = df.rename(columns=name_conversion.analysis_cols_dict)
 
     # Add missing cols
-    for col in list(name_conversion_dict.db_schema_dict.keys()):
+    for col in list(name_conversion.analysis_schema_dict.keys()):
         if col not in df.columns:
             df[col] = None
 
     # Reorder columns
-    df = df[list(name_conversion_dict.db_schema_dict.keys())]
+    df = df[list(name_conversion.analysis_schema_dict.keys())]
 
     return df
 
@@ -97,7 +75,7 @@ def nvarcharConvert(df):
     # Create a list of columns that contain NVARCHAR datatype
     nvarchar_cols = [
         k
-        for k, v in name_conversion_dict.db_schema_dict.items()
+        for k, v in name_conversion.analysis_schema_dict.items()
         if "NVARCHAR" in str(v)
     ]
 
@@ -111,46 +89,36 @@ def nvarcharConvert(df):
 if __name__ == "__main__":
     """This is executed when run from the command line"""
 
-    # # Connect to the database
-    # conn_string = getConfigData("CONN_STRING")
-    # engine = sal.create_engine(conn_string)
-    # conn = engine.connect()
-    # print("Connected to DB")
+    # Connect to the database
+    conn_string = config.SAL_STRING
+    engine = sal.create_engine(conn_string)
+    conn = engine.connect()
+    print("Connected to DB")
 
-    # # Create df with all original location ids from db
-    # loc_id_sql = "SELECT [location_id] FROM [gfwpro].[dbo].[list-protectedAreas_import]"
-    # loc_id_df = pd.read_sql(loc_id_sql, conn)
-    # print("Retrieved location_id data from database")
-
-    # # Read csv to df
-    # file_path = getConfigData("PROT_FILE_PATH")
-    # input_df = pd.read_csv(file_path, sep="\t")
-    # print("Read input data")
-
-    # # Merge dataframes
-    # merged_df = pd.merge(loc_id_df, input_df, on="location_id", how="outer")
-    # print("Created merged dataframe")
+    # Read csv to df
+    df = pd.read_csv(config.INPUT_GDB_PATH, sep="\t")
+    print("Read input data")
 
     # Clean input_df
-    merged_df = cleanData(merged_df)
+    df = cleanData(df)
     print("Cleaned dataframe columns")
 
     # Replace boolean values with string
-    merged_df = boolConvert(merged_df)
+    df = boolConvert(df)
     print("Converted bool values")
 
     # Replace null nvarchar values with {}
-    merged_df = nvarcharConvert(merged_df)
+    df = nvarcharConvert(df)
     print("Converted nvarchar values")
 
     # Save to database
     print("Saving dataframe to database")
-    merged_df.to_sql(
+    df.to_sql(
         "analysis-protectedAreas_import",
         conn,
         index=False,
         if_exists="replace",
-        dtype=name_conversion_dict.db_schema_dict,
+        dtype=name_conversion.analysis_schema_dict,
     )
 
     print("Done")

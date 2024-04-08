@@ -126,24 +126,3 @@ analysis_schema_dict = {
     "arg_otbn_area": sal.NVARCHAR(length=None),
     "argentina_presence": sal.NVARCHAR(length=None),
 }
-
-list_cols_dict = {
-    "Location Name": "Name",
-    "Latitude": "",
-    "Longitude": "",
-    "Country": "",
-    "State": "",
-    "Sub State": "",
-    "Size": "",
-    "IUCN CAT": "",
-    "Designation Type": "",
-    "Designation": "",
-    "Location CLassification": "",
-    "gadmid": "",
-    "globalid": "",
-    "WDPAID": "",
-    "WDPA_PID": "",
-    "Geometry": "",
-    "location_id": "",
-    "id": "",
-}
