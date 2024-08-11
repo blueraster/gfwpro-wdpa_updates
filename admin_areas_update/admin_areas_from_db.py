@@ -103,6 +103,6 @@ if __name__ == "__main__":
     print("connected")
 
     # administrative areas only
-    main(conn, "administrativeAreas")
+    main(conn, "list-administrativeAreas")
 
     print("done")
