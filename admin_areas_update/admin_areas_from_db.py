@@ -73,6 +73,7 @@ def main(connection, current_table, save_geojson=False):
     print("converting to geopandas")
     gdf = convertWKBforGPD(df, 'geom')
     gdf.drop(columns=['geom'], inplace=True)
+    gdf['geometry'] = gdf['geometry'].buffer(0)
     #print(gdf.head())
 
     print("creating in memory grid")
