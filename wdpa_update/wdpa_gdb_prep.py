@@ -1,10 +1,8 @@
-# transform_gdb_to_tsv.py
-
-
+import os
 import pandas as pd
 import geopandas as gpd
 from pathlib import Path
-
+import wdpa_config as cfg
 
 def renameColumns(df):
     """
@@ -101,7 +99,7 @@ def enrichWDPA(path, start, end):
 if __name__ == "__main__":
     start_row = 0
     batch_size = 10000
-    fgdb = "with_gadm_id.gdb"
+    fgdb = os.path.join("data", "with_gadm_id.gdb")
     has_more_rows = True
 
     while has_more_rows:

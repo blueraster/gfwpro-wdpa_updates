@@ -1,32 +1,7 @@
-# save_to_database.py
-
-
-import configparser
 import pandas as pd
 import sqlalchemy as sal
 import name_conversion_dict
-
-
-# Import data from config.ini
-def getConfigData(config_request):
-    """
-    Reads data from a local config file
-
-    Args:
-      config_request  : String containing the data to be retrieved
-
-    Return:
-      The requested data
-    """
-
-    config_file = r"gfwlists\wdpa\config.ini"
-
-    config = configparser.ConfigParser()
-    config.read(config_file)
-    config_response = config.get("DEFAULT", config_request)
-
-    return config_response
-
+import wdpa_config as cfg
 
 def cleanData(df):
     """
@@ -64,7 +39,6 @@ def cleanData(df):
 
     return df
 
-
 def boolConvert(df):
     """
     Converts boolean values to text equivalents
@@ -81,7 +55,6 @@ def boolConvert(df):
     df = df.where(mask, df.replace(d))
 
     return df
-
 
 def nvarcharConvert(df):
     """
@@ -107,12 +80,11 @@ def nvarcharConvert(df):
 
     return df
 
-
 if __name__ == "__main__":
     """This is executed when run from the command line"""
 
     # Connect to the database
-    conn_string = getConfigData("CONN_STRING")
+    conn_string = cfg.sal_string
     engine = sal.create_engine(conn_string)
     conn = engine.connect()
     print("Connected to DB")
@@ -123,7 +95,7 @@ if __name__ == "__main__":
     print("Retrieved location_id data from database")
 
     # Read csv to df
-    file_path = getConfigData("PROT_FILE_PATH")
+    file_path = cfg.processed_csv
     input_df = pd.read_csv(file_path, sep="\t")
     print("Read input data")
 

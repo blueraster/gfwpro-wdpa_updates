@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -86,8 +85,7 @@ def main(connection, current_table):
     gdf_intersection["geom"] = gdf_intersection.geometry.apply(wkb.dumps, hex=True)  # add in wkb
 
     print("saving to csv")
-    out_path = os.path.join("data", f"diced_{current_table}")
-    gdf_intersection[["list_id", "location_id", "geom"]].to_csv(out_path, sep="\t", index=False)
+    gdf_intersection[["list_id", "location_id", "geom"]].to_csv(cfg.admin_areas_out_path, sep="\t", index=False)
 
     return
 
