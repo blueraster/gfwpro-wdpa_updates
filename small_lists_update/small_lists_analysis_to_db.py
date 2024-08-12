@@ -88,7 +88,15 @@ def create_table(conn, table_name):
     return
 
 def data_cleaning(df):
-    # convert boolean columns into lowercase strings
+    """
+    Preps data for transfer to DB
+
+    Params:
+        df: Analysis results in dataframe
+
+    Returns:
+        Dataframe with cleaned values
+    """
     mask = df.applymap(type) != bool
     d = {True: 'true', False: 'false'}
     df = df.where(mask, df.replace(d))
