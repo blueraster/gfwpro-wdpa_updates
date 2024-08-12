@@ -103,7 +103,9 @@ def data_cleaning(df):
 
 if __name__ == "__main__":
     # Connect to the db
+    print("Connecting to DB")
     connection = pyodbc.connect(cfg.conn_string)
+    print("Connected")
 
     match cfg.list_number:
         case 2:
@@ -115,14 +117,18 @@ if __name__ == "__main__":
         case _:
             print("Invalid list number, failed to create temp table")
             sys.exit(1)
-        
+    
+    print(f"Creating {table_name}")
     create_table(connection, table_name)
 
     # Load and clean the CSV
+    print("Loading CSV data")
     df = pd.read_csv(cfg.analysis_path, sep="\t")
+    print("Cleaning CSV data")
     df = data_cleaning(df)
 
     # Insert the data
+    print("Inserting data")
     with connection:
         cursor = connection.cursor()
         updated_rows = 0
@@ -133,4 +139,4 @@ if __name__ == "__main__":
             cursor.execute(sql_insert, row.values.tolist())
             updated_rows += 1
 
-    print(f"Updated rows: {updated_rows}")
+    print(f"Finished. Rows updated: {updated_rows}")
