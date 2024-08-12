@@ -16,6 +16,8 @@ def data_cleaning(df):
     d = {True: 'true', False: 'false'}
     df = df.where(mask, df.replace(d))
 
+    df = df.rename(columns={"status_code": "status_id"})
+
     return df
 
 def get_items_to_update(df):
@@ -29,8 +31,6 @@ def get_items_to_update(df):
         List of values to update
     """
     df_list_level_results = df[df['location_id'] == -1]
-
-    df_list_level_results = df_list_level_results.rename(columns={"status_code": "status_id"})
 
     df_list_level_values_to_update = df_list_level_results[cfg.small_lists_list_level_columns].values.tolist()[0]
 
