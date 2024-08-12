@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -55,11 +56,10 @@ def convertWKBforGPD(dataframe, columnName):
         raise ValueError(e)
     return df
 
-def main(connection, current_table, save_geojson=False):
+def main(connection, current_table):
     """
     Main function to split a list of polygons into a grid
     :param filename:
-    :param save_geojson:
     :return:
     """
     print(f'working on {current_table}')
@@ -81,18 +81,13 @@ def main(connection, current_table, save_geojson=False):
 
     print("intersection with grid")
     gdf_intersection = gpd.overlay(gdf, grid, how="intersection", keep_geom_type=True, make_valid=True)
-    # print(gdf_intersection.head())
-    # print(gdf_intersection.columns)
 
     print("save geometry as wkb")
     gdf_intersection["geom"] = gdf_intersection.geometry.apply(wkb.dumps, hex=True)  # add in wkb
 
     print("saving to csv")
-    gdf_intersection[["list_id", "location_id", "geom"]].to_csv(f"diced_{current_table}", sep="\t", index=False)
-
-    if save_geojson==True:
-        print("saving to geojson")
-        gdf_intersection.to_file("diced.geojson", driver="GeoJSON")
+    out_path = os.path.join("data", f"diced_{current_table}")
+    gdf_intersection[["list_id", "location_id", "geom"]].to_csv(out_path, sep="\t", index=False)
 
     return
 

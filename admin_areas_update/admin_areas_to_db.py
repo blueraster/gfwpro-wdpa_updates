@@ -1,28 +1,7 @@
 import os
-import sys
-import logging
-import configparser
 import pandas as pd
 import sqlalchemy as sal
-
-root = logging.getLogger()
-root.setLevel(logging.INFO)
-
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-root.addHandler(handler)
-
-# Import data from config.ini
-def getConfigData(config_request):
-  current_directory = os.path.dirname(os.path.abspath(__file__))
-  config_file = os.path.join(current_directory, 'config.ini')
-
-  config = configparser.ConfigParser()
-  config.read(config_file)
-  config_response = config.get('DEFAULT', config_request)
-  return(config_response)
+import admin_config as cfg
 
 # Data cleaning
 def cleanData(new_dataframe, location_id_dataframe, column_name_dataframe):
@@ -78,8 +57,7 @@ def cleanNvarchar(cleaned_dataframe):
 
 # Save to db
 def saveToDatabase(final_dataframe, tableName):
-    final_dataframe.to_csv(os.path.join(getConfigData('OUTPUT_FOLDER_PATH'), tableName + '.csv'), index=False)
-    final_dataframe.to_sql(f'new_{tableName}', conn, index=False, if_exists='replace', dtype=columnDataType())
+    final_dataframe.to_sql(f'{tableName}_new', conn, index=False, if_exists='replace', dtype=columnDataType())
 
 # Returns dictionary with column names and data types
 # Update this is there if column names change or are added
@@ -158,52 +136,46 @@ def columnDataType():
     return(db_schema)
 
 # Performs dataframe operations
-def main(connection, current_table):
-    logging.info(f'working on {current_table}')
-
-    file_path = ''
-    if current_table == 'analysis-administrativeAreas':
-        file_path = 'ADMIN_FILE_PATH'
-    elif current_table == 'analysis-protectedAreas':
-        file_path = 'PROT_FILE_PATH'
+def main(connection, current_table, in_file):
+    print(f'working on {current_table}')
 
     # Get original col names
     col_sql = f"SELECT TOP (1) * FROM dbo.[{current_table}]"
     col_df = pd.read_sql(col_sql, connection)
-    logging.info("loaded column name dataframe")
+    print("loaded column name dataframe")
 
     # Get original location_ids
     loc_sql = f"SELECT [location_id] FROM dbo.[{current_table}]"
     loc_df = pd.read_sql(loc_sql, connection)
-    logging.info("loaded location_id dataframe")
+    print("loaded location_id dataframe")
 
     # Read new data from .tsv
-    new_df = pd.read_csv(getConfigData(file_path), sep='\t')
-    logging.info("loaded new data dataframe")
+    new_df = pd.read_csv(in_file, sep='\t')
+    print("loaded new data dataframe")
 
     # Clean new_df
     clean_df = cleanData(new_df, loc_df, col_df)
-    logging.info("cleanData() complete")
+    print("cleanData() complete")
 
     # Replace boolean values with string
     clean_df = boolConvert(clean_df)
-    logging.info("boolConvert() complete")
+    print("boolConvert() complete")
 
     # Replaces None values with {} in NVARCHAR data type cols
     clean_df = cleanNvarchar(clean_df)
-    logging.info("cleanNvarchar() complete")
+    print("cleanNvarchar() complete")
 
-    logging.info("saving dataframe to database")
+    print("saving dataframe to database")
     saveToDatabase(clean_df, current_table)
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
 
-    engine = sal.create_engine(getConfigData('CONN_STRING'))
+    engine = sal.create_engine(cfg.sal_string)
     conn = engine.connect()
-    logging.info("connected to db")
+    print("connected to db")
     
-    for table_name in ['analysis-administrativeAreas', 'analysis-protectedAreas']:
-        main(conn, table_name)
+    file_path = os.path.join("data", "admin_area_results.csv")
+    main(conn, 'analysis-administrativeAreas', file_path)
 
-    logging.info("done")
+    print("done")
