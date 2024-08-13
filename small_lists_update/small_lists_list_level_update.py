@@ -56,7 +56,7 @@ if __name__ == "__main__":
     with connection:
         cursor = connection.cursor()
         cursor.fast_executemany = True
-        set_tokens = ','.join([f'"{x}=?' for x in cfg.small_lists_list_level_columns[:-1]])
+        set_tokens = ','.join([f'"{x}"=?' for x in cfg.small_lists_list_level_columns[:-1]])
         sql = f'UPDATE dbo.[GFWAnalyses] SET {set_tokens} WHERE list_id=?'
         cursor.execute(sql, items_to_update)
 
