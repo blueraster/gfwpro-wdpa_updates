@@ -8,8 +8,12 @@ import admin_config as cfg
 def createGrid(degrees=1.0):
     """
     Create a Geopandas dataframe fishnet grid
-    :param degrees: spacing in decimal degrees
-    :return: fishnet
+
+    Params:
+        degrees: Size of grid
+    
+    Return:
+        Dataframe containing grid.
     """
     ulx, uly, lrx, lry = -180, 90, 180, -90
 
@@ -35,6 +39,7 @@ def createGrid(degrees=1.0):
     s = gpd.GeoSeries.from_wkt(wkts)
     df = gpd.GeoDataFrame(geometry=s, crs="EPSG:4326")
     df["grid"] = df.index
+    
     return df
 
 def convertWKBforGPD(dataframe, columnName):
@@ -43,9 +48,12 @@ def convertWKBforGPD(dataframe, columnName):
 
     Uses shapely wkb.loads to convert original geometry into geopandas format
 
-    :param dataframe: pandas dataframe
-    :param columnName: column name that contains the WKB
-    :return: geopandas dataframe
+    Params:
+        dataframe: DF to convert
+        columnName: name of geometry columns
+    
+    Return:
+        dataframe with converted geometry
     """
     try:
         dataframe["geometry"] = dataframe[columnName].apply(wkb.loads, hex=True)
@@ -53,13 +61,16 @@ def convertWKBforGPD(dataframe, columnName):
     except Exception as e:
         print(e)
         raise ValueError(e)
+    
     return df
 
 def main(connection, current_table):
     """
-    Main function to split a list of polygons into a grid
-    :param filename:
-    :return:
+    Main function to split a list of polygons into a grid, then saves to CSV
+
+    Params:
+        connection: SQLAlchemy connection to db
+        current_table: String name of table
     """
     print(f'working on {current_table}')
 
