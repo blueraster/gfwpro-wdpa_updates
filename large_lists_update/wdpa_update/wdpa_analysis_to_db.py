@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlalchemy as sal
-import old.name_conversion_dict as name_conversion_dict
 import wdpa_config as cfg
+import name_conversion_dict as db_names
 
 def cleanData(df):
     """
@@ -27,15 +27,15 @@ def cleanData(df):
     )
 
     # Rename cols
-    df = df.rename(columns=name_conversion_dict.col_names_dict)
+    df = df.rename(columns=db_names.col_names_dict)
 
     # Add missing cols
-    for col in list(name_conversion_dict.db_schema_dict.keys()):
+    for col in list(db_names.db_schema_dict.keys()):
         if col not in df.columns:
             df[col] = None
 
     # Reorder columns
-    df = df[list(name_conversion_dict.db_schema_dict.keys())]
+    df = df[list(db_names.db_schema_dict.keys())]
 
     return df
 
@@ -70,7 +70,7 @@ def nvarcharConvert(df):
     # Create a list of columns that contain NVARCHAR datatype
     nvarchar_cols = [
         k
-        for k, v in name_conversion_dict.db_schema_dict.items()
+        for k, v in db_names.db_schema_dict.items()
         if "NVARCHAR" in str(v)
     ]
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
         conn,
         index=False,
         if_exists="replace",
-        dtype=name_conversion_dict.db_schema_dict,
+        dtype=db_names.db_schema_dict,
     )
 
     print("Done")
