@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import sqlalchemy as sal
 import admin_config as cfg
@@ -135,7 +134,6 @@ if __name__ == "__main__":
     conn = engine.connect()
     print("connected to db")
     
-    file_path = os.path.join("data", "admin_area_results.csv")
-    main(conn, 'analysis-administrativeAreas', file_path)
+    main(conn, 'analysis-administrativeAreas', cfg.admin_analysis_data)
 
     print("done")
