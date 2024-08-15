@@ -1,6 +1,6 @@
 import pandas as pd
 import sqlalchemy as sal
-import name_conversion_dict
+import old.name_conversion_dict as name_conversion_dict
 import wdpa_config as cfg
 
 def cleanData(df):
