@@ -1,51 +1,12 @@
 import pyodbc
-import logging
 import geopandas as gpd
 import wdpa_config as cfg
-
-import warnings
-
-import logging
-import sys
-
-# Set up the basic configuration for logging to stdout
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(message)s",
-    datefmt="%y-%m-%d %H:%M:%S",
-    stream=sys.stdout,
-)
-
-# Create a FileHandler to log messages to a file
-file_handler = logging.FileHandler("logfile.txt")  # Specify the file name here
-
-# Set the logging level for the file handler (if different from the basic configuration)
-file_handler.setLevel(logging.INFO)
-
-# Create a formatter for the file handler
-file_formatter = logging.Formatter(
-    "%(asctime)s - %(levelname)s - %(message)s", datefmt="%y-%m-%d %H:%M:%S"
-)
-
-# Set the formatter for the file handler
-file_handler.setFormatter(file_formatter)
-
-# Add the file handler to the root logger
-logging.getLogger().addHandler(file_handler)
-
-# Suppress the specific UserWarning about geographic CRS
-warnings.filterwarnings("ignore", category=UserWarning, module="shapely")
-
 
 def wdpa_renameColumns(df):
     """
     Rename columns in a dataframe
-    :param df: input dataframe
-    :param rename_dict: dictionary of old column name to new column name
-    :return: dataframe with renamed columns
     """
-
-    # rename columns
+    # DB col names dict
     rename_dict = {
         "NAME": "Location Name",
         "GIS_AREA": "Size",
@@ -71,19 +32,17 @@ def wdpa_renameColumns(df):
 
     return df
 
-
 def loadGFWList(path, start, end, connection):
-
+    """
+    Loads and preps the geodataframe
+    """
     gdf = gpd.read_file(path, driver="FileGDB", layer=0, rows=slice(start, end))
-
     gdf = wdpa_renameColumns(gdf)
-
     e = insert_geometry_WDPA(gdf, connection)
 
     return e
 
-
-def insert_geometry_WDPA(gdf, connection_string):
+def insert_geometry_WDPA(gdf, connection):
     """
     Large list processing - insert new locations into locations table
     """
@@ -112,10 +71,6 @@ def insert_geometry_WDPA(gdf, connection_string):
     ]
 
     locations_objectid_list = gdf["id"].tolist()
-
-    # get database connection info from SSM
-
-    connection = pyodbc.connect(connection_string)
 
     gdf.geometry = gdf.buffer(0)
 
@@ -161,29 +116,28 @@ def insert_geometry_WDPA(gdf, connection_string):
             sql = f"INSERT into [dbo].[{analysis_table_name}] ({column_name_string}) VALUES ({value_marks})"
             cursor.executemany(sql, t)
 
-        logging.info(f"Adding {len(t)} empty rows to {analysis_table_name} finished")
-        error_file = None
+        print(f"Adding {len(t)} empty rows to {analysis_table_name} finished")
+
         return []
     except Exception as e:
-        logging.exception(e)
+        print(e)
         return locations_objectid_list  # return list of failed locations
-
 
 if __name__ == "__main__":
     """This is executed when run from the command line"""
-    connection = cfg.conn_string
+    print("Connecting to DB")
+    connection = pyodbc.connect(cfg.conn_string)
+    print("Connected to DB")
 
+    # Iteratively load data to DB
     failed = []
-
     batch_size = 1000
-    for i in range(0, 276000, batch_size):
-        logging.info(f"Loading {i} to {i+batch_size}")
+    for i in range(0, 300000, batch_size):
+        print(f"Loading {i} to {i+batch_size}")
         try:
             e = loadGFWList(cfg.fgdb_path, i, i + batch_size, connection)
             if len(e) > 0:
                 failed.extend(e)
-                logging.info(f"Failed {len(e)}")
+                print(f"Failed {len(e)}")
         except Exception as e:
             print(e)
-            logging.exception(e)
-            continue
